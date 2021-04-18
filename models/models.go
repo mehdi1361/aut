@@ -10,9 +10,9 @@ var db *gorm.DB
 
 type User struct {
 	gorm.Model
-	UserName       string `json:"user_name" gorm:"size:60"`
-	Password       string `json:"password" gorm:"size:60"`
-	MobileNo       string `json:"mobile_no" gorm:"size:10"`
+	UserName       string `json:"user_name" gorm:"size:60;unique"`
+	Password       string `json:"password" gorm:"size:250"`
+	MobileNo       string `json:"mobile_no" gorm:"size:11;unique"`
 	Active         bool   `json:"active" gorm:"default:true"`
 	ChangePassword bool   `json:"change_password" gorm:"default:true"`
 }
