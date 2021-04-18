@@ -15,6 +15,11 @@ type LoginParam struct {
 	Password string `json:"password"`
 }
 
+type LoginParamResponse struct {
+	UserName string `json:"user_name"`
+	Token    string `json:"token"`
+}
+
 type CreateUserParam struct {
 	UserName string `json:"user_name"`
 	Password string `json:"password"`

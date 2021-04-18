@@ -33,15 +33,12 @@ func UserLoginHandler(c *gin.Context) {
 		return
 	}
 
-	db, err := models.Connect()
+	statusCode, result, err := UserLogin(param)
 	if err != nil {
-		c.JSON(200, gin.H{"test": "t"})
-		return
+		c.JSON(statusCode, err)
+	} else {
+		c.JSON(statusCode, result)
 	}
-	var user models.User
-	db.Where(&models.User{UserName: param.UserName, Password: common.GetMD5Hash(param.Password)}).First(&user)
-	s, _ := convertParamToDict(user)
-	c.JSON(200, s)
 }
 
 func CreateUser(c *gin.Context) {

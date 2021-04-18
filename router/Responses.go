@@ -2,6 +2,7 @@ package router
 
 import (
 	"encoding/json"
+	"login_service/common"
 	"login_service/models"
 )
 
@@ -40,4 +41,27 @@ func AppCheckResponse(f ParamsApp) map[string]interface{} {
 		response, _ := convertParamToDict(&ResponseParamApp{"app authorization failed", false})
 		return response
 	}
+}
+
+func UserLogin(param LoginParam) (int, map[string]interface{}, error) {
+	db, err := models.Connect()
+	if err != nil {
+		return 400, nil, err
+	}
+	var user models.User
+	dbResult := db.Where(&models.User{UserName: param.UserName, Password: common.GetMD5Hash(param.Password)}).First(&user)
+	if dbResult.Error != nil {
+		return 400, nil, err
+	}
+
+	s, err := convertParamToDict(
+		&LoginParamResponse{
+			UserName: param.UserName,
+			Token:    common.TokenGenerator(user.UserName, user.Password),
+		},
+	)
+	if err != nil {
+		return 400, nil, err
+	}
+	return 200, s, nil
 }
