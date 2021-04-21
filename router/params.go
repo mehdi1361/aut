@@ -25,3 +25,8 @@ type CreateUserParam struct {
 	Password string `json:"password"`
 	MobileNo string `json:"mobile_no"`
 }
+
+type CreateRole struct {
+	Name   string `json:"name"`
+	FaName string `json:"fa_name"`
+}

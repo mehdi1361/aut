@@ -15,7 +15,7 @@ func main() {
 	r.POST("/login", router.UserLoginHandler)
 	r.POST("/user", router.CreateUser)
 	r.GET("/check", router.CheckPermission)
-	r.GET("/check", router.CheckPermission)
+	r.POST("/role", router.RoleCreate)
 
 	err := r.Run()
 	if err != nil {

@@ -93,22 +93,26 @@ func CheckPermission(c *gin.Context) {
 	c.JSON(200, result)
 }
 
-type Role struct{}
-
-func (r *Role) POST(c *gin.Context) {
+func RoleCreate(c *gin.Context) {
+	var param CreateRole
+	if err := c.ShouldBindBodyWith(&param, binding.JSON); err != nil {
+		log.Printf("%+v", err)
+		c.JSON(400, err)
+		return
+	}
 	db, err := models.Connect()
 	if err != nil {
 		c.JSON(200, gin.H{"message": "error in connect to database"})
 		return
 	}
 	role := &models.Role{
-		Name:   "test",
-		FaName: "test",
+		Name:   param.Name,
+		FaName: param.FaName,
 	}
 	result := db.Create(&role)
 
 	if result.Error != nil {
-		c.JSON(400, gin.H{"message": fmt.Sprintf("user created, %v", result.Error)})
+		c.JSON(400, gin.H{"message": fmt.Sprintf("error:, %v", result.Error)})
 	} else {
 		c.JSON(201, gin.H{"message": fmt.Sprintf("user created, %v", role.Name)})
 	}

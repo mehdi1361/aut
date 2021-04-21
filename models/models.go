@@ -33,8 +33,8 @@ func (a *App) TableName() string {
 
 type Role struct {
 	gorm.Model
-	Name        string       `json:"name" gorm:"size:50;unique"`
-	FaName      string       `json:"fa_name"`
+	Name        string       `json:"name" gorm:"size:50;unique;not null"`
+	FaName      string       `json:"fa_name" orm:"size:50;unique;not null"`
 	Permissions []Permission `json:"permissions" gorm:"foreignKey:RoleName"`
 }
 
