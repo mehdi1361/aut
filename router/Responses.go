@@ -2,8 +2,10 @@ package router
 
 import (
 	"encoding/json"
+	"fmt"
 	"login_service/common"
 	"login_service/models"
+	"time"
 )
 
 func convertParamToDict(v interface{}) (map[string]interface{}, error) {
@@ -53,15 +55,17 @@ func UserLogin(param LoginParam) (int, map[string]interface{}, error) {
 	if dbResult.Error != nil {
 		return 400, nil, err
 	}
-
+	token := fmt.Sprintf("%s-%s", common.TokenGenerator(user), user.UserId)
 	s, err := convertParamToDict(
 		&LoginParamResponse{
 			UserName: param.UserName,
-			Token:    common.TokenGenerator(user.UserName, user.Password),
+			Token:    token,
 		},
 	)
 	if err != nil {
 		return 400, nil, err
 	}
+	AppCache.KeyContainDelete(user.UserId)
+	_ = AppCache.Set(token, s, 20*time.Hour)
 	return 200, s, nil
 }

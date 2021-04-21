@@ -1,18 +1,23 @@
 package router
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"log"
 	"login_service/common"
 	"login_service/models"
+	"time"
 )
 
 func PingHandler(c *gin.Context) {
+	//r, _ := AppCache.Get("ping")
+
 	c.JSON(200, gin.H{
-		"message": "pong",
+		"message": AppCache.KeyContain("il"),
 	})
+
 }
 
 func AppAccessHandler(c *gin.Context) {
@@ -22,7 +27,19 @@ func AppAccessHandler(c *gin.Context) {
 		c.JSON(400, err)
 		return
 	}
-	c.JSON(200, AppCheckResponse(f))
+
+	result, _ := AppCache.Get(fmt.Sprintf("%s-%s", f.ClientId, f.SecretKey))
+	if len(result) == 0 {
+		data := AppCheckResponse(f)
+		_ = AppCache.Set(fmt.Sprintf("%s-%s", f.ClientId, f.SecretKey), data, 10*time.Minute)
+		c.JSON(200, data)
+
+	} else {
+		r := make(map[string]interface{})
+		_ = json.Unmarshal([]byte(string(result)), &r)
+		c.JSON(200, r)
+	}
+
 }
 
 func UserLoginHandler(c *gin.Context) {
@@ -56,6 +73,7 @@ func CreateUser(c *gin.Context) {
 	user := models.User{
 		UserName: param.UserName,
 		Password: common.GetMD5Hash(param.Password),
+		UserId:   common.UuidGenerator(),
 		MobileNo: param.MobileNo,
 	}
 	result := db.Create(&user)
@@ -66,4 +84,12 @@ func CreateUser(c *gin.Context) {
 		c.JSON(201, gin.H{"message": fmt.Sprintf("user created, %v", user.UserName)})
 
 	}
+}
+
+func CheckPermission(c *gin.Context) {
+	token := c.Request.Header["Token"][0]
+	d, _ := AppCache.Get(token)
+	var result map[string]interface{}
+	_ = json.Unmarshal([]byte(string(d)), &result)
+	c.JSON(200, result)
 }
