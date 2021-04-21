@@ -82,7 +82,6 @@ func CreateUser(c *gin.Context) {
 		c.JSON(400, gin.H{"message": fmt.Sprintf("user created, %v", result.Error)})
 	} else {
 		c.JSON(201, gin.H{"message": fmt.Sprintf("user created, %v", user.UserName)})
-
 	}
 }
 
@@ -92,4 +91,26 @@ func CheckPermission(c *gin.Context) {
 	var result map[string]interface{}
 	_ = json.Unmarshal([]byte(string(d)), &result)
 	c.JSON(200, result)
+}
+
+type Role struct{}
+
+func (r *Role) POST(c *gin.Context) {
+	db, err := models.Connect()
+	if err != nil {
+		c.JSON(200, gin.H{"message": "error in connect to database"})
+		return
+	}
+	role := &models.Role{
+		Name:   "test",
+		FaName: "test",
+	}
+	result := db.Create(&role)
+
+	if result.Error != nil {
+		c.JSON(400, gin.H{"message": fmt.Sprintf("user created, %v", result.Error)})
+	} else {
+		c.JSON(201, gin.H{"message": fmt.Sprintf("user created, %v", role.Name)})
+	}
+
 }
