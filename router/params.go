@@ -16,8 +16,9 @@ type LoginParam struct {
 }
 
 type LoginParamResponse struct {
-	UserName string `json:"user_name"`
-	Token    string `json:"token"`
+	UserName    string   `json:"user_name"`
+	Token       string   `json:"token"`
+	Permissions []string `json:"permissions"`
 }
 
 type CreateUserParam struct {
@@ -29,4 +30,14 @@ type CreateUserParam struct {
 type CreateRole struct {
 	Name   string `json:"name"`
 	FaName string `json:"fa_name"`
+}
+
+type CreatePermission struct {
+	Name     string `json:"name"`
+	RoleName string `json:"role_name"`
+}
+
+type CreateUserPermission struct {
+	UserId     string `json:"user_id"`
+	Permission string `json:"permission"`
 }

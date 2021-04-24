@@ -114,7 +114,66 @@ func RoleCreate(c *gin.Context) {
 	if result.Error != nil {
 		c.JSON(400, gin.H{"message": fmt.Sprintf("error:, %v", result.Error)})
 	} else {
-		c.JSON(201, gin.H{"message": fmt.Sprintf("user created, %v", role.Name)})
+		c.JSON(201, gin.H{"message": fmt.Sprintf("role created, %v", role.Name)})
 	}
 
+}
+
+func PermissionCreated(c *gin.Context) {
+	var param CreatePermission
+	if err := c.ShouldBindBodyWith(&param, binding.JSON); err != nil {
+		log.Printf("%+v", err)
+		c.JSON(400, err)
+		return
+	}
+	db, err := models.Connect()
+	if err != nil {
+		c.JSON(200, gin.H{"message": "error in connect to database"})
+		return
+	}
+	var role models.Role
+	dbResult := db.Where(&models.Role{Name: param.RoleName}).First(&role)
+	if dbResult.Error != nil {
+		c.JSON(400, gin.H{"message": "error find role"})
+		return
+	}
+
+	permission := models.Permission{
+		Name:   param.Name,
+		RoleId: role.ID,
+	}
+	db.Create(&permission)
+
+	c.JSON(201, gin.H{"message": "permission created"})
+}
+
+func UserPermission(c *gin.Context) {
+	var param CreateUserPermission
+	if err := c.ShouldBindBodyWith(&param, binding.JSON); err != nil {
+		log.Printf("%+v", err)
+		c.JSON(400, err)
+		return
+	}
+	db, err := models.Connect()
+	if err != nil {
+		c.JSON(200, gin.H{"message": "error in connect to database"})
+		return
+	}
+	var user models.User
+	var permission models.Permission
+
+	userResult := db.Where(&models.User{UserId: param.UserId}).First(&user)
+	if userResult.Error != nil {
+		c.JSON(400, gin.H{"message": "error find user"})
+		return
+	}
+
+	permissionResult := db.Where(&models.Permission{Name: param.Permission}).First(&permission)
+	if permissionResult.Error != nil {
+		c.JSON(400, gin.H{"message": "error find permission"})
+		return
+	}
+
+	db.Model(&user).Association("Permissions").Append(&permission)
+	c.JSON(400, gin.H{"message": "permission append to user"})
 }

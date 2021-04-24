@@ -8,12 +8,13 @@ import (
 
 type User struct {
 	gorm.Model
-	UserName       string `json:"user_name" gorm:"size:60;unique"`
-	Password       string `json:"password" gorm:"size:250"`
-	MobileNo       string `json:"mobile_no" gorm:"size:11;unique"`
-	UserId         string `json:"user_id" gorm:"unique"`
-	Active         bool   `json:"active" gorm:"default:true"`
-	ChangePassword bool   `json:"change_password" gorm:"default:true"`
+	UserName       string       `json:"user_name" gorm:"size:60;unique"`
+	Password       string       `json:"password" gorm:"size:250"`
+	MobileNo       string       `json:"mobile_no" gorm:"size:11;unique"`
+	UserId         string       `json:"user_id" gorm:"unique"`
+	Active         bool         `json:"active" gorm:"default:true"`
+	ChangePassword bool         `json:"change_password" gorm:"default:true"`
+	Permissions    []Permission `json:"permissions" gorm:"many2many:auth_user_service_permission"`
 }
 
 func (u *User) TableName() string {
@@ -35,7 +36,7 @@ type Role struct {
 	gorm.Model
 	Name        string       `json:"name" gorm:"size:50;unique;not null"`
 	FaName      string       `json:"fa_name" orm:"size:50;unique;not null"`
-	Permissions []Permission `json:"permissions" gorm:"foreignKey:RoleName"`
+	Permissions []Permission `json:"permissions"`
 }
 
 func (r *Role) TableName() string {
@@ -44,8 +45,8 @@ func (r *Role) TableName() string {
 
 type Permission struct {
 	gorm.Model
-	Name     string `json:"name" gorm:"size:50"`
-	RoleName string `json:"role_name"`
+	Name   string `json:"name" gorm:"size:50"`
+	RoleId uint   `json:"role_id" gorm:"Column:role_id"`
 }
 
 func (p Permission) TableName() string {
@@ -68,5 +69,6 @@ func init() {
 	defer conn.Close()
 
 	db := conn
-	_ = db.AutoMigrate(&User{}, &App{}, &Role{}, &Permission{})
+	_ = db.AutoMigrate(&User{}, &Role{}, &Permission{})
+	db.Model(&Permission{}).AddForeignKey("role_id", "auth_service_role(id)", "CASCADE", "CASCADE")
 }

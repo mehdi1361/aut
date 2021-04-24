@@ -8,14 +8,15 @@ import (
 )
 
 func main() {
-
 	r := gin.Default()
-	r.GET("/ping", router.PingHandler)
-	r.GET("/app_access", router.AppAccessHandler)
-	r.POST("/login", router.UserLoginHandler)
+	r.GET("/ping/", router.PingHandler)
+	r.GET("/app_access/", router.AppAccessHandler)
+	r.POST("/login/", router.UserLoginHandler)
 	r.POST("/user", router.CreateUser)
-	r.GET("/check", router.CheckPermission)
-	r.POST("/role", router.RoleCreate)
+	r.GET("/check/", router.CheckPermission)
+	r.POST("/role/", router.RoleCreate)
+	r.POST("/permission/", router.PermissionCreated)
+	r.POST("/user/permission/", router.UserPermission)
 
 	err := r.Run()
 	if err != nil {

@@ -51,15 +51,20 @@ func UserLogin(param LoginParam) (int, map[string]interface{}, error) {
 		return 400, nil, err
 	}
 	var user models.User
-	dbResult := db.Where(&models.User{UserName: param.UserName, Password: common.GetMD5Hash(param.Password)}).First(&user)
+	dbResult := db.Preload("Permissions").Where(&models.User{UserName: param.UserName, Password: common.GetMD5Hash(param.Password)}).First(&user)
 	if dbResult.Error != nil {
 		return 400, nil, err
+	}
+	var lstPerm []string
+	for _, v := range user.Permissions {
+		lstPerm = append(lstPerm, v.Name)
 	}
 	token := fmt.Sprintf("%s-%s", common.TokenGenerator(user), user.UserId)
 	s, err := convertParamToDict(
 		&LoginParamResponse{
-			UserName: param.UserName,
-			Token:    token,
+			UserName:    param.UserName,
+			Token:       token,
+			Permissions: lstPerm,
 		},
 	)
 	if err != nil {
