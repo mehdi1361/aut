@@ -90,7 +90,12 @@ func CheckPermission(c *gin.Context) {
 	d, _ := AppCache.Get(token)
 	var result map[string]interface{}
 	_ = json.Unmarshal([]byte(string(d)), &result)
-	c.JSON(200, result)
+	if result != nil {
+		c.JSON(200, result)
+		return
+	}
+	c.JSON(200, gin.H{"message": "user not found"})
+
 }
 
 func RoleCreate(c *gin.Context) {
