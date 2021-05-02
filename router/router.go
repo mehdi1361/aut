@@ -77,6 +77,7 @@ func CreateUser(c *gin.Context) {
 		MobileNo: param.MobileNo,
 	}
 	result := db.Create(&user)
+	defer db.Close()
 
 	if result.Error != nil {
 		c.JSON(400, gin.H{"message": fmt.Sprintf("user created, %v", result.Error)})
@@ -121,6 +122,7 @@ func RoleCreate(c *gin.Context) {
 	} else {
 		c.JSON(201, gin.H{"message": fmt.Sprintf("role created, %v", role.Name)})
 	}
+	defer db.Close()
 
 }
 
@@ -150,6 +152,7 @@ func PermissionCreated(c *gin.Context) {
 	db.Create(&permission)
 
 	c.JSON(201, gin.H{"message": "permission created"})
+	defer db.Close()
 }
 
 func UserPermission(c *gin.Context) {
@@ -181,4 +184,5 @@ func UserPermission(c *gin.Context) {
 
 	db.Model(&user).Association("Permissions").Append(&permission)
 	c.JSON(400, gin.H{"message": "permission append to user"})
+	defer db.Close()
 }

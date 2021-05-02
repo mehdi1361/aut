@@ -45,7 +45,7 @@ func (r *Role) TableName() string {
 
 type Permission struct {
 	gorm.Model
-	Name   string `json:"name" gorm:"size:50"`
+	Name   string `json:"name" gorm:"size:50;unique"`
 	RoleId uint   `json:"role_id" gorm:"Column:role_id"`
 }
 
@@ -56,7 +56,7 @@ func (p Permission) TableName() string {
 func Connect() (db *gorm.DB, err error) {
 	conn, err := gorm.Open(
 		"postgres",
-		"host=localhost port=5432 user=mebco_user dbname=mebco_db password=mebco_1060 sslmode=disable",
+		"host=10.1.2.202 port=5432 user=postgres dbname=mebco_test_db password=13610522 sslmode=disable",
 	)
 	return conn, err
 }

@@ -32,6 +32,7 @@ func AppCheckResponse(f ParamsApp) map[string]interface{} {
 	var app models.App
 	db.Where(&models.App{ClientId: f.ClientId}).First(&app)
 
+	defer db.Close()
 	if f.SecretKey == "" {
 		response, _ := convertParamToDict(&ResponseParamApp{"secret key not found", false})
 		return response
@@ -50,6 +51,8 @@ func UserLogin(param LoginParam) (int, map[string]interface{}, error) {
 	if err != nil {
 		return 400, nil, err
 	}
+
+	defer db.Close()
 	var user models.User
 	dbResult := db.Preload("Permissions").Where(&models.User{UserName: param.UserName, Password: common.GetMD5Hash(param.Password)}).First(&user)
 	if dbResult.Error != nil {
