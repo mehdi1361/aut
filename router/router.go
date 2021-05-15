@@ -11,6 +11,12 @@ import (
 	"time"
 )
 
+func errHandler(c *gin.Context, errorMessage string) {
+	if r := recover(); r != nil {
+		c.JSON(400, gin.H{"message": errorMessage})
+	}
+}
+
 func PingHandler(c *gin.Context) {
 	//r, _ := AppCache.Get("ping")
 
@@ -87,6 +93,7 @@ func CreateUser(c *gin.Context) {
 }
 
 func CheckPermission(c *gin.Context) {
+	defer errHandler(c, "error to parse header")
 	token := c.Request.Header["Token"][0]
 	d, _ := AppCache.Get(token)
 	var result map[string]interface{}

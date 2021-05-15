@@ -1,14 +1,21 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	_ "github.com/patrickmn/go-cache"
 	"log"
 	"login_service/router"
+	"os"
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		panic(err)
+	}
 	r := gin.Default()
 	r.GET("/ping/", router.PingHandler)
 	r.GET("/app_access/", router.AppAccessHandler)
@@ -22,7 +29,8 @@ func main() {
 	config.AllowAllOrigins = true
 	r.Use(cors.New(config))
 
-	err := r.Run(":3000")
+	port := os.Getenv("PORT")
+	err = r.Run(fmt.Sprintf(":%s", port))
 	if err != nil {
 		log.Fatal(err)
 	}
