@@ -87,9 +87,14 @@ func CreateUser(c *gin.Context) {
 	defer db.Close()
 
 	if result.Error != nil {
-		c.JSON(400, gin.H{"message": fmt.Sprintf("user created, %v", result.Error)})
+		c.JSON(400, gin.H{
+			"message": fmt.Sprintf("user created, %v", result.Error),
+		})
 	} else {
-		c.JSON(201, gin.H{"message": fmt.Sprintf("user created, %v", user.UserName)})
+		c.JSON(201, gin.H{
+			"message": fmt.Sprintf("user created, %v", user.UserName),
+			"id":      user.UserId,
+		})
 	}
 }
 
