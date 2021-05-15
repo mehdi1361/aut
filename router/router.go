@@ -73,7 +73,7 @@ func CreateUser(c *gin.Context) {
 	}
 	db, err := models.Connect()
 	if err != nil {
-		c.JSON(200, gin.H{"test": "t"})
+		c.JSON(500, gin.H{"Message": "error in connect to database"})
 		return
 	}
 	user := models.User{
@@ -81,6 +81,7 @@ func CreateUser(c *gin.Context) {
 		Password: common.GetMD5Hash(param.Password),
 		UserId:   common.UuidGenerator(),
 		MobileNo: param.MobileNo,
+		UserType: param.UserType,
 	}
 	result := db.Create(&user)
 	defer db.Close()

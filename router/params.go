@@ -19,12 +19,14 @@ type LoginParamResponse struct {
 	UserName    string   `json:"user_name"`
 	Token       string   `json:"token"`
 	Permissions []string `json:"permissions"`
+	UserType    string   `json:"user_type"`
 }
 
 type CreateUserParam struct {
 	UserName string `json:"user_name"`
 	Password string `json:"password"`
 	MobileNo string `json:"mobile_no"`
+	UserType string `json:"user_type"`
 }
 
 type CreateRole struct {

@@ -70,6 +70,7 @@ func UserLogin(param LoginParam) (int, map[string]interface{}, error) {
 			UserName:    param.UserName,
 			Token:       token,
 			Permissions: lstNamePermission,
+			UserType:    user.UserType,
 		},
 	)
 	if err != nil {
