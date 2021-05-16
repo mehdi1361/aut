@@ -52,18 +52,28 @@ func UserLogin(param LoginParam) (int, map[string]interface{}, error) {
 		return 400, nil, err
 	}
 
-	defer db.Close()
 	var user models.User
 	var permissions []models.Permission
 
-	//dbResult := db.Preload("Permissions").First(&models.User{UserName: param.UserName, Password: common.GetMD5Hash(param.Password)}).First(&user)
-	db.First(&user, "user_name=?", param.UserName)
+	t := common.GetMD5Hash(param.Password)
+
+	//_ = db.Preload("Permissions").Where(&models.User{UserName: param.UserName, Password: t}).First(&user)
+	db.First(&user, "user_name=? and password=?", param.UserName, t)
+	if t != user.Password {
+		result := make(map[string]interface{})
+		result["message"] = "user not found"
+		defer db.Close()
+
+		return 404, result, nil
+	}
 	db.Model(&user).Related(&permissions, "Permissions")
 
 	var lstNamePermission []string
 	for _, v := range permissions {
 		lstNamePermission = append(lstNamePermission, v.Name)
 	}
+	defer db.Close()
+
 	token := fmt.Sprintf("%s-%s", common.TokenGenerator(user), user.UserId)
 	s, err := convertParamToDict(
 		&LoginParamResponse{
