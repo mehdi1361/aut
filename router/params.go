@@ -20,13 +20,15 @@ type LoginParamResponse struct {
 	Token       string   `json:"token"`
 	Permissions []string `json:"permissions"`
 	UserType    string   `json:"user_type"`
+	IsSuperuser bool     `json:"is_superuser"`
 }
 
 type CreateUserParam struct {
-	UserName string `json:"username"`
-	Password string `json:"password"`
-	MobileNo string `json:"mobile_no"`
-	UserType string `json:"user_type"`
+	UserName    string `json:"username"`
+	Password    string `json:"password"`
+	MobileNo    string `json:"mobile_no"`
+	UserType    string `json:"user_type"`
+	IsSuperuser bool   `json:"is_superuser"`
 }
 
 type CreateRole struct {

@@ -77,11 +77,12 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 	user := models.User{
-		UserName: param.UserName,
-		Password: common.GetMD5Hash(param.Password),
-		UserId:   common.UuidGenerator(),
-		MobileNo: param.MobileNo,
-		UserType: param.UserType,
+		UserName:    param.UserName,
+		Password:    common.GetMD5Hash(param.Password),
+		UserId:      common.UuidGenerator(),
+		MobileNo:    param.MobileNo,
+		UserType:    param.UserType,
+		IsSuperUser: param.IsSuperuser,
 	}
 	result := db.Create(&user)
 	defer db.Close()

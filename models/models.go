@@ -17,6 +17,7 @@ type User struct {
 	Active         bool          `json:"active" gorm:"default:true"`
 	ChangePassword bool          `json:"change_password" gorm:"default:true"`
 	UserType       string        `json:"user_type" gorm:"size:60;index:idx_name"`
+	IsSuperUser    bool          `json:"is_superuser" gorm:"default:false"`
 	Permissions    []*Permission `json:"permissions" gorm:"many2many:auth_user_service_permission"`
 }
 
