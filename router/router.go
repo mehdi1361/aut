@@ -200,3 +200,38 @@ func UserPermission(c *gin.Context) {
 	c.JSON(400, gin.H{"message": "permission append to user"})
 	defer db.Close()
 }
+
+func EditUser(c *gin.Context) {
+	var param CreateUserParam
+	if err := c.ShouldBindBodyWith(&param, binding.JSON); err != nil {
+		log.Printf("%+v", err)
+		c.JSON(400, err)
+		return
+	}
+	db, err := models.Connect()
+	if err != nil {
+		c.JSON(500, gin.H{"Message": "error in connect to database"})
+		return
+	}
+	user := models.User{
+		UserName:    param.UserName,
+		Password:    common.GetMD5Hash(param.Password),
+		UserId:      common.UuidGenerator(),
+		MobileNo:    param.MobileNo,
+		UserType:    param.UserType,
+		IsSuperUser: param.IsSuperuser,
+	}
+	result := db.Create(&user)
+	defer db.Close()
+
+	if result.Error != nil {
+		c.JSON(400, gin.H{
+			"message": fmt.Sprintf("user created, %v", result.Error),
+		})
+	} else {
+		c.JSON(201, gin.H{
+			"message": fmt.Sprintf("user created, %v", user.UserName),
+			"id":      user.UserId,
+		})
+	}
+}

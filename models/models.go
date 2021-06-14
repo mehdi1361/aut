@@ -12,7 +12,7 @@ type User struct {
 	gorm.Model
 	UserName       string        `json:"user_name" gorm:"size:60;unique;index:idx_name"`
 	Password       string        `json:"password" gorm:"size:250"`
-	MobileNo       string        `json:"mobile_no" gorm:"size:11;unique"`
+	MobileNo       string        `json:"mobile_no" gorm:"size:11"`
 	UserId         string        `json:"user_id" gorm:"unique"`
 	Active         bool          `json:"active" gorm:"default:true"`
 	ChangePassword bool          `json:"change_password" gorm:"default:true"`
@@ -85,4 +85,5 @@ func init() {
 	db := conn
 	_ = db.AutoMigrate(&User{}, &Role{}, &Permission{})
 	db.Model(&Permission{}).AddForeignKey("role_id", "auth_service_role(id)", "CASCADE", "CASCADE")
+	db.Exec("alter table auth_service_user drop constraint auth_service_user_mobile_no_key;")
 }

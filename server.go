@@ -21,6 +21,7 @@ func main() {
 	r.GET("/app_access/", router.AppAccessHandler)
 	r.POST("/login/", router.UserLoginHandler)
 	r.POST("/user/", router.CreateUser)
+	r.PUT("/user/", router.EditUser)
 	r.GET("/check/", router.CheckPermission)
 	r.POST("/role/", router.RoleCreate)
 	r.POST("/permission/", router.PermissionCreated)
