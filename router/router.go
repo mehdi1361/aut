@@ -140,6 +140,18 @@ func RoleCreate(c *gin.Context) {
 
 }
 
+func ListRole(c *gin.Context) {
+	var records []models.Role
+	db, err := models.Connect()
+
+	if err != nil {
+		c.JSON(200, gin.H{"message": fmt.Sprintf("error in connect to database %s", err)})
+		return
+	}
+	db.Find(&records)
+	c.JSON(200, records)
+}
+
 func PermissionCreated(c *gin.Context) {
 	var param CreatePermission
 	if err := c.ShouldBindBodyWith(&param, binding.JSON); err != nil {
@@ -167,6 +179,17 @@ func PermissionCreated(c *gin.Context) {
 
 	c.JSON(201, gin.H{"message": "permission created"})
 	defer db.Close()
+}
+func ListPermission(c *gin.Context) {
+	var records []models.Permission
+	db, err := models.Connect()
+
+	if err != nil {
+		c.JSON(200, gin.H{"message": fmt.Sprintf("error in connect to database %s", err)})
+		return
+	}
+	db.Find(&records)
+	c.JSON(200, records)
 }
 
 func UserPermission(c *gin.Context) {
