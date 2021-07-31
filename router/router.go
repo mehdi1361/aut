@@ -180,6 +180,7 @@ func PermissionCreated(c *gin.Context) {
 	c.JSON(201, gin.H{"message": "permission created"})
 	defer db.Close()
 }
+
 func ListPermission(c *gin.Context) {
 	var records []models.Permission
 	db, err := models.Connect()
@@ -220,7 +221,7 @@ func UserPermission(c *gin.Context) {
 	}
 
 	db.Model(&user).Association("Permissions").Append(&permission)
-	c.JSON(400, gin.H{"message": "permission append to user"})
+	c.JSON(200, gin.H{"message": "permission append to user"})
 	defer db.Close()
 }
 
@@ -257,4 +258,71 @@ func EditUser(c *gin.Context) {
 			"id":      user.UserId,
 		})
 	}
+}
+
+func ListCustomerRole(c *gin.Context) {
+	var records []models.CustomerRole
+	db, err := models.Connect()
+
+	if err != nil {
+		c.JSON(200, gin.H{"message": fmt.Sprintf("error in connect to database %s", err)})
+		return
+	}
+	db.Find(&records)
+	c.JSON(200, records)
+}
+
+func CustomerRoleCreated(c *gin.Context) {
+	var param CreateCustomerRole
+	if err := c.ShouldBindBodyWith(&param, binding.JSON); err != nil {
+		log.Printf("%+v", err)
+		c.JSON(400, err)
+		return
+	}
+	db, err := models.Connect()
+	if err != nil {
+		c.JSON(200, gin.H{"message": "error in connect to database"})
+		return
+	}
+
+	permission := models.CustomerRole{
+		Name: param.Name,
+		Type: param.Type,
+	}
+	db.Create(&permission)
+
+	c.JSON(201, gin.H{"message": "permission created"})
+	defer db.Close()
+}
+
+func CustomerUserRole(c *gin.Context) {
+	var param CreateCustomerRoleUser
+	if err := c.ShouldBindBodyWith(&param, binding.JSON); err != nil {
+		log.Printf("%+v", err)
+		c.JSON(400, err)
+		return
+	}
+	db, err := models.Connect()
+	if err != nil {
+		c.JSON(200, gin.H{"message": "error in connect to database"})
+		return
+	}
+	var user models.User
+	var customerRole models.CustomerRole
+
+	userResult := db.Where(&models.User{UserId: param.UserId}).First(&user)
+	if userResult.Error != nil {
+		c.JSON(400, gin.H{"message": "error find user"})
+		return
+	}
+
+	permissionResult := db.Where(&models.CustomerRole{Name: param.CustomerRole}).First(&customerRole)
+	if permissionResult.Error != nil {
+		c.JSON(400, gin.H{"message": "error find permission"})
+		return
+	}
+
+	db.Model(&user).Association("CustomerRole").Append(&customerRole)
+	c.JSON(200, gin.H{"message": "permission append to user"})
+	defer db.Close()
 }

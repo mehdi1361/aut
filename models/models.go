@@ -5,20 +5,23 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/joho/godotenv"
+	"github.com/qor/validations"
+	"login_service/utils"
 	"os"
 )
 
 type User struct {
 	gorm.Model
-	UserName       string        `json:"user_name" gorm:"size:60;unique;index:idx_name"`
-	Password       string        `json:"password" gorm:"size:250"`
-	MobileNo       string        `json:"mobile_no" gorm:"size:11"`
-	UserId         string        `json:"user_id" gorm:"unique"`
-	Active         bool          `json:"active" gorm:"default:true"`
-	ChangePassword bool          `json:"change_password" gorm:"default:true"`
-	UserType       string        `json:"user_type" gorm:"size:60;index:idx_name"`
-	IsSuperUser    bool          `json:"is_superuser" gorm:"default:false"`
-	Permissions    []*Permission `json:"permissions" gorm:"many2many:auth_user_service_permission"`
+	UserName       string          `json:"user_name" gorm:"size:60;unique;index:idx_name"`
+	Password       string          `json:"password" gorm:"size:250"`
+	MobileNo       string          `json:"mobile_no" gorm:"size:11"`
+	UserId         string          `json:"user_id" gorm:"unique"`
+	Active         bool            `json:"active" gorm:"default:true"`
+	ChangePassword bool            `json:"change_password" gorm:"default:true"`
+	UserType       string          `json:"user_type" gorm:"size:60;index:idx_name"`
+	IsSuperUser    bool            `json:"is_superuser" gorm:"default:false"`
+	Permissions    []*Permission   `json:"permissions" gorm:"many2many:auth_user_service_permission"`
+	CustomerRole   []*CustomerRole `json:"customer_role" gorm:"many2many:auth_user_service_customer_role"`
 }
 
 func (u *User) TableName() string {
@@ -58,6 +61,27 @@ func (p Permission) TableName() string {
 	return "auth_service_permissions"
 }
 
+type CustomerRole struct {
+	gorm.Model
+	Name  string  `json:"name" gorm:"size:50;unique"`
+	Type  string  `json:"type" gorm:"size:50;unique"`
+	Users []*User `json:"users" gorm:"many2many:auth_user_service_customer_role"`
+}
+
+func (cr CustomerRole) TableName() string {
+	return "auth_service_customer_roles"
+}
+
+func (cr CustomerRole) Validate(db *gorm.DB) {
+	customSl := &utils.StringSlice{}
+	customSl.DataReader([]interface{}{"branch", "comex"})
+	filter := &utils.Filter{}
+
+	if filter.Contain(customSl, cr.Type) {
+		_ = db.AddError(validations.NewError(cr, "Type", "Type need to be in "))
+	}
+}
+
 func Connect() (db *gorm.DB, err error) {
 	envErr := godotenv.Load()
 	if envErr != nil {
@@ -72,6 +96,7 @@ func Connect() (db *gorm.DB, err error) {
 		"postgres",
 		fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable", server, port, dbUser, database, password),
 	)
+	validations.RegisterCallbacks(conn)
 	return conn, err
 }
 
@@ -83,7 +108,6 @@ func init() {
 	defer conn.Close()
 
 	db := conn
-	_ = db.AutoMigrate(&User{}, &Role{}, &Permission{})
+	_ = db.AutoMigrate(&User{}, &Role{}, &Permission{}, CustomerRole{})
 	db.Model(&Permission{}).AddForeignKey("role_id", "auth_service_role(id)", "CASCADE", "CASCADE")
-	db.Exec("alter table auth_service_user drop constraint auth_service_user_mobile_no_key;")
 }

@@ -27,7 +27,10 @@ func main() {
 	r.GET("/role/", router.ListRole)
 	r.POST("/permission/", router.PermissionCreated)
 	r.GET("/permission/", router.ListPermission)
+	r.GET("/customer_role/", router.ListCustomerRole)
+	r.POST("/customer_role/", router.CustomerRoleCreated)
 	r.POST("/user/permission/", router.UserPermission)
+	r.POST("/user/customer_role/", router.CustomerUserRole)
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true
 	r.Use(cors.New(config))

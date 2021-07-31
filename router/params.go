@@ -45,3 +45,13 @@ type CreateUserPermission struct {
 	UserId     string `json:"user_id"`
 	Permission string `json:"permission"`
 }
+
+type CreateCustomerRole struct {
+	Name string `json:"name"`
+	Type string `json:"type"`
+}
+
+type CreateCustomerRoleUser struct {
+	UserId       string `json:"user_id"`
+	CustomerRole string `json:"customer_role"`
+}
