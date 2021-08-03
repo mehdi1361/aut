@@ -1,13 +1,13 @@
 package main
 
 import (
+	"aut/router"
 	"fmt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	_ "github.com/patrickmn/go-cache"
 	"log"
-	"login_service/router"
 	"os"
 )
 
@@ -31,6 +31,8 @@ func main() {
 	r.POST("/customer_role/", router.CustomerRoleCreated)
 	r.POST("/user/permission/", router.UserPermission)
 	r.POST("/user/customer_role/", router.CustomerUserRole)
+	r.PATCH("/user/change_state/", router.UpdateActiveState)
+	r.PATCH("/user/edit/", router.UpdateUserData)
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true
 	r.Use(cors.New(config))

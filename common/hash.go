@@ -1,10 +1,10 @@
 package common
 
 import (
+	"aut/models"
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
-	"login_service/models"
 	"time"
 )
 

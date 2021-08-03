@@ -1,13 +1,15 @@
 package router
 
 import (
+	"aut/common"
+	"aut/models"
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"log"
-	"login_service/common"
-	"login_service/models"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -206,22 +208,30 @@ func UserPermission(c *gin.Context) {
 		return
 	}
 	var user models.User
-	var permission models.Permission
 
-	userResult := db.Where(&models.User{UserId: param.UserId}).First(&user)
+	userResult := db.Where("id = ?", param.UserId).First(&user)
 	if userResult.Error != nil {
 		c.JSON(400, gin.H{"message": "error find user"})
 		return
 	}
 
-	permissionResult := db.Where(&models.Permission{Name: param.Permission}).First(&permission)
-	if permissionResult.Error != nil {
-		c.JSON(400, gin.H{"message": "error find permission"})
-		return
+	lstPermission := strings.Split(param.Permission, ",")
+	for _, v := range lstPermission {
+		var permission models.Permission
+		data, err := strconv.Atoi(v)
+		if err != nil {
+			c.JSON(400, gin.H{"message": "error permission id is not valid"})
+			return
+		}
+		permissionResult := db.Where("id = ?", data).First(&permission)
+		if permissionResult.Error != nil {
+			c.JSON(400, gin.H{"message": "error find permission"})
+			return
+		}
+		db.Model(&user).Association("Permissions").Append(&permission)
 	}
 
-	db.Model(&user).Association("Permissions").Append(&permission)
-	c.JSON(200, gin.H{"message": "permission append to user"})
+	c.JSON(200, gin.H{"message": "permissions append to user"})
 	defer db.Close()
 }
 
@@ -324,5 +334,44 @@ func CustomerUserRole(c *gin.Context) {
 
 	db.Model(&user).Association("CustomerRole").Append(&customerRole)
 	c.JSON(200, gin.H{"message": "permission append to user"})
+	defer db.Close()
+}
+
+func UpdateActiveState(c *gin.Context) {
+	var param ChangeActiveState
+	if err := c.ShouldBindBodyWith(&param, binding.JSON); err != nil {
+		log.Printf("%+v", err)
+		c.JSON(400, err)
+		return
+	}
+	db, err := models.Connect()
+	if err != nil {
+		c.JSON(400, gin.H{"message": "error in connect to database"})
+		return
+	}
+	db.Model(&models.User{}).Where("id = ?", param.UserId).Update("active", param.State)
+	c.JSON(200, gin.H{"message": fmt.Sprintf("change active to %t", param.State)})
+	defer db.Close()
+}
+func UpdateUserData(c *gin.Context) {
+	var param UserDataUpdate
+	if err := c.ShouldBindBodyWith(&param, binding.JSON); err != nil {
+		log.Printf("%+v", err)
+		c.JSON(400, err)
+		return
+	}
+	db, err := models.Connect()
+	if err != nil {
+		c.JSON(400, gin.H{"message": "error in connect to database"})
+		return
+	}
+
+	if len(param.MobileNo) > 11 {
+		c.JSON(400, gin.H{"message": fmt.Sprintf("len %s is greater than 11", param.MobileNo)})
+		return
+	}
+	db.Model(&models.User{}).Where("id = ?", param.UserId).Update("is_super_user", param.IsSuperUser)
+	db.Model(&models.User{}).Where("id = ?", param.UserId).Update("mobile_no", param.MobileNo)
+	c.JSON(200, gin.H{"message": fmt.Sprintf("user with id:%d updated", param.UserId)})
 	defer db.Close()
 }

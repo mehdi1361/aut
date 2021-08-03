@@ -42,7 +42,7 @@ type CreatePermission struct {
 }
 
 type CreateUserPermission struct {
-	UserId     string `json:"user_id"`
+	UserId     int    `json:"user_id"`
 	Permission string `json:"permission"`
 }
 
@@ -54,4 +54,15 @@ type CreateCustomerRole struct {
 type CreateCustomerRoleUser struct {
 	UserId       string `json:"user_id"`
 	CustomerRole string `json:"customer_role"`
+}
+
+type ChangeActiveState struct {
+	UserId int  `json:"user_id"`
+	State  bool `json:"state"`
+}
+
+type UserDataUpdate struct {
+	UserId      int    `json:"user_id"`
+	MobileNo    string `json:"mobile_no"`
+	IsSuperUser bool   `json:"is_superuser"`
 }

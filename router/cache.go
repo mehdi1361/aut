@@ -1,8 +1,8 @@
 package router
 
 import (
+	"aut/common"
 	"github.com/patrickmn/go-cache"
-	"login_service/common"
 	"time"
 )
 

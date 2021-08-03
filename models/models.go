@@ -1,12 +1,12 @@
 package models
 
 import (
+	"aut/utils"
 	"fmt"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/joho/godotenv"
 	"github.com/qor/validations"
-	"login_service/utils"
 	"os"
 )
 

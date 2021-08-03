@@ -1,10 +1,10 @@
 package router
 
 import (
+	"aut/common"
+	"aut/models"
 	"encoding/json"
 	"fmt"
-	"login_service/common"
-	"login_service/models"
 	"time"
 )
 
@@ -81,6 +81,7 @@ func UserLogin(param LoginParam) (int, map[string]interface{}, error) {
 			Token:       token,
 			Permissions: lstNamePermission,
 			UserType:    user.UserType,
+			IsSuperuser: user.IsSuperUser,
 		},
 	)
 	if err != nil {
