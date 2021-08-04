@@ -88,3 +88,20 @@ func (r AppCache) KeyContainDelete(key string) {
 		r.Delete(val)
 	}
 }
+
+func Difference(x, y []int) []int {
+	var result []int
+	for _, v1 := range x {
+		found := false
+		for _, v2 := range y {
+			if v1 == v2 {
+				found = true
+				break
+			}
+		}
+		if !found {
+			result = append(result, v1)
+		}
+	}
+	return result
+}

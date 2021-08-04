@@ -58,6 +58,16 @@ func UserLoginHandler(c *gin.Context) {
 		return
 	}
 
+	var records []models.Branch
+	db, err := models.Connect()
+
+	if err != nil {
+		c.JSON(200, gin.H{"message": fmt.Sprintf("error in connect to database %s", err)})
+		return
+	}
+	db.Find(&records)
+	fmt.Println(records)
+
 	statusCode, result, err := UserLogin(param)
 	if err != nil {
 		c.JSON(statusCode, err)
@@ -209,13 +219,19 @@ func UserPermission(c *gin.Context) {
 	}
 	var user models.User
 
-	userResult := db.Where("id = ?", param.UserId).First(&user)
+	userResult := db.Preload("Permissions").Where("id = ?", param.UserId).First(&user)
 	if userResult.Error != nil {
 		c.JSON(400, gin.H{"message": "error find user"})
 		return
 	}
 
+	var lstUserPermId []int
+	for _, v := range user.Permissions {
+		lstUserPermId = append(lstUserPermId, int(v.ID))
+	}
+	var newValidPerm []int
 	lstPermission := strings.Split(param.Permission, ",")
+
 	for _, v := range lstPermission {
 		var permission models.Permission
 		data, err := strconv.Atoi(v)
@@ -223,6 +239,7 @@ func UserPermission(c *gin.Context) {
 			c.JSON(400, gin.H{"message": "error permission id is not valid"})
 			return
 		}
+		newValidPerm = append(newValidPerm, data)
 		permissionResult := db.Where("id = ?", data).First(&permission)
 		if permissionResult.Error != nil {
 			c.JSON(400, gin.H{"message": "error find permission"})
@@ -231,7 +248,19 @@ func UserPermission(c *gin.Context) {
 		db.Model(&user).Association("Permissions").Append(&permission)
 	}
 
-	c.JSON(200, gin.H{"message": "permissions append to user"})
+	for _, v := range common.Difference(lstUserPermId, newValidPerm) {
+		var permission models.Permission
+		permissionResult := db.Where("id = ?", v).First(&permission)
+		if permissionResult.Error != nil {
+			c.JSON(400, gin.H{"message": "error find permission"})
+			return
+		}
+		db.Model(&user).Association("Permissions").Delete(&permission)
+	}
+	db.Model(&user).Association("Permissions").Delete()
+	fmt.Println(common.Difference(lstUserPermId, newValidPerm))
+
+	c.JSON(200, gin.H{"message": "permissions update for user"})
 	defer db.Close()
 }
 

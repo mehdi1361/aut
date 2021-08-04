@@ -1,6 +1,8 @@
 package models
 
 import (
+	"aut/common"
+	"aut/router"
 	"aut/utils"
 	"fmt"
 	"github.com/jinzhu/gorm"
@@ -8,6 +10,8 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/qor/validations"
 	"os"
+	"strconv"
+	"strings"
 )
 
 type User struct {
@@ -22,10 +26,51 @@ type User struct {
 	IsSuperUser    bool            `json:"is_superuser" gorm:"default:false"`
 	Permissions    []*Permission   `json:"permissions" gorm:"many2many:auth_user_service_permission"`
 	CustomerRole   []*CustomerRole `json:"customer_role" gorm:"many2many:auth_user_service_customer_role"`
+	Groups         string          `json:"groups" gorm:"size:60"`
+	Branches       string          `json:"branches" gorm:"size:60"`
 }
 
 func (u *User) TableName() string {
 	return "auth_service_user"
+}
+func (u *User) PermissionUpdate(param router.CreateUserPermission) error {
+	db, err := Connect()
+	defer db.Close()
+	if err != nil {
+		return err
+	}
+	var lstUserPermId []int
+	for _, v := range u.Permissions {
+		lstUserPermId = append(lstUserPermId, int(v.ID))
+	}
+	var newValidPerm []int
+	lstPermission := strings.Split(param.Permission, ",")
+
+	for _, v := range lstPermission {
+		var permission Permission
+		data, err := strconv.Atoi(v)
+		if err != nil {
+			return err
+		}
+		newValidPerm = append(newValidPerm, data)
+		permissionResult := db.Where("id = ?", data).First(&permission)
+		if permissionResult.Error != nil {
+			return err
+		}
+		db.Model(&u).Association("Permissions").Append(&permission)
+	}
+
+	for _, v := range common.Difference(lstUserPermId, newValidPerm) {
+		var permission Permission
+		permissionResult := db.Where("id = ?", v).First(&permission)
+		if permissionResult.Error != nil {
+			return err
+		}
+		db.Model(&u).Association("Permissions").Delete(&permission)
+	}
+	db.Model(&u).Association("Permissions").Delete()
+	fmt.Println(common.Difference(lstUserPermId, newValidPerm))
+	return nil
 }
 
 type App struct {
@@ -82,6 +127,26 @@ func (cr CustomerRole) Validate(db *gorm.DB) {
 	}
 }
 
+type Group struct {
+	Id    string  `json:"id" gorm:"column:customer_group_id"`
+	Name  string  `json:"name" gorm:"size:50;unique;column:customer_group_name"`
+	Users []*User `json:"users" gorm:"many2many:auth_user_service_group"`
+}
+
+func (g Group) TableName() string {
+	return "customer_group"
+}
+
+type Branch struct {
+	Id    string  `json:"id" gorm:"column:branch_id"`
+	Name  string  `json:"name" gorm:"column:branch_name"`
+	Users []*User `json:"users" gorm:"many2many:auth_user_service_branch"`
+}
+
+func (b Branch) TableName() string {
+	return "broker_branch"
+}
+
 func Connect() (db *gorm.DB, err error) {
 	envErr := godotenv.Load()
 	if envErr != nil {
@@ -109,5 +174,7 @@ func init() {
 
 	db := conn
 	_ = db.AutoMigrate(&User{}, &Role{}, &Permission{}, CustomerRole{})
+
 	db.Model(&Permission{}).AddForeignKey("role_id", "auth_service_role(id)", "CASCADE", "CASCADE")
+	db.Model(&User{}).AutoMigrate()
 }
