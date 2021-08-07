@@ -30,6 +30,7 @@ func main() {
 	r.GET("/customer_role/", router.ListCustomerRole)
 	r.POST("/customer_role/", router.CustomerRoleCreated)
 	r.POST("/user/permission/", router.UserPermission)
+	r.GET("/user/permission/", router.GetUserPermission)
 	r.POST("/user/customer_role/", router.CustomerUserRole)
 	r.PATCH("/user/change_state/", router.UpdateActiveState)
 	r.PATCH("/user/edit/", router.UpdateUserData)

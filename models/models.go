@@ -1,8 +1,6 @@
 package models
 
 import (
-	"aut/common"
-	"aut/router"
 	"aut/utils"
 	"fmt"
 	"github.com/jinzhu/gorm"
@@ -10,8 +8,6 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/qor/validations"
 	"os"
-	"strconv"
-	"strings"
 )
 
 type User struct {
@@ -33,45 +29,46 @@ type User struct {
 func (u *User) TableName() string {
 	return "auth_service_user"
 }
-func (u *User) PermissionUpdate(param router.CreateUserPermission) error {
-	db, err := Connect()
-	defer db.Close()
-	if err != nil {
-		return err
-	}
-	var lstUserPermId []int
-	for _, v := range u.Permissions {
-		lstUserPermId = append(lstUserPermId, int(v.ID))
-	}
-	var newValidPerm []int
-	lstPermission := strings.Split(param.Permission, ",")
 
-	for _, v := range lstPermission {
-		var permission Permission
-		data, err := strconv.Atoi(v)
-		if err != nil {
-			return err
-		}
-		newValidPerm = append(newValidPerm, data)
-		permissionResult := db.Where("id = ?", data).First(&permission)
-		if permissionResult.Error != nil {
-			return err
-		}
-		db.Model(&u).Association("Permissions").Append(&permission)
-	}
-
-	for _, v := range common.Difference(lstUserPermId, newValidPerm) {
-		var permission Permission
-		permissionResult := db.Where("id = ?", v).First(&permission)
-		if permissionResult.Error != nil {
-			return err
-		}
-		db.Model(&u).Association("Permissions").Delete(&permission)
-	}
-	db.Model(&u).Association("Permissions").Delete()
-	fmt.Println(common.Difference(lstUserPermId, newValidPerm))
-	return nil
-}
+//func (u *User) PermissionUpdate(param router.CreateUserPermission) error {
+//	db, err := Connect()
+//	defer db.Close()
+//	if err != nil {
+//		return err
+//	}
+//	var lstUserPermId []int
+//	for _, v := range u.Permissions {
+//		lstUserPermId = append(lstUserPermId, int(v.ID))
+//	}
+//	var newValidPerm []int
+//	lstPermission := strings.Split(param.Permission, ",")
+//
+//	for _, v := range lstPermission {
+//		var permission Permission
+//		data, err := strconv.Atoi(v)
+//		if err != nil {
+//			return err
+//		}
+//		newValidPerm = append(newValidPerm, data)
+//		permissionResult := db.Where("id = ?", data).First(&permission)
+//		if permissionResult.Error != nil {
+//			return err
+//		}
+//		db.Model(&u).Association("Permissions").Append(&permission)
+//	}
+//
+//	for _, v := range common.Difference(lstUserPermId, newValidPerm) {
+//		var permission Permission
+//		permissionResult := db.Where("id = ?", v).First(&permission)
+//		if permissionResult.Error != nil {
+//			return err
+//		}
+//		db.Model(&u).Association("Permissions").Delete(&permission)
+//	}
+//	db.Model(&u).Association("Permissions").Delete()
+//	fmt.Println(common.Difference(lstUserPermId, newValidPerm))
+//	return nil
+//}
 
 type App struct {
 	gorm.Model

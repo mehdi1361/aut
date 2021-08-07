@@ -66,7 +66,6 @@ func UserLoginHandler(c *gin.Context) {
 		return
 	}
 	db.Find(&records)
-	fmt.Println(records)
 
 	statusCode, result, err := UserLogin(param)
 	if err != nil {
@@ -403,4 +402,19 @@ func UpdateUserData(c *gin.Context) {
 	db.Model(&models.User{}).Where("id = ?", param.UserId).Update("mobile_no", param.MobileNo)
 	c.JSON(200, gin.H{"message": fmt.Sprintf("user with id:%d updated", param.UserId)})
 	defer db.Close()
+}
+
+func GetUserPermission(c *gin.Context) {
+	var param GetUserPermissionParam
+	if err := c.ShouldBindBodyWith(&param, binding.JSON); err != nil {
+		log.Printf("%+v", err)
+		c.JSON(400, err)
+		return
+	}
+	errCode, result, err := GetPermission(param.UserId)
+	if err != nil {
+		c.JSON(errCode, gin.H{"message": fmt.Sprintf("error with id:%d permissions", err)})
+		return
+	}
+	c.JSON(errCode, result)
 }

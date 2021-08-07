@@ -5,6 +5,7 @@ import (
 	"aut/models"
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"time"
 )
 
@@ -89,5 +90,36 @@ func UserLogin(param LoginParam) (int, map[string]interface{}, error) {
 	}
 	AppCache.KeyContainDelete(user.UserId)
 	_ = AppCache.Set(token, s, 20*time.Hour)
+	return 200, s, nil
+}
+
+func GetPermission(userId int) (int, map[string]interface{}, error) {
+	db, err := models.Connect()
+	if err != nil {
+		return 400, nil, err
+	}
+
+	var user models.User
+	var permissions []models.Permission
+	pUId := strconv.Itoa(userId)
+	uId, _ := strconv.Atoi(pUId)
+	db.Where("id=?", uId).First(&user)
+	db.Model(&user).Related(&permissions, "Permissions")
+
+	var lstNamePermission []string
+	for _, v := range permissions {
+		lstNamePermission = append(lstNamePermission, v.Name)
+	}
+	defer db.Close()
+
+	s, err := convertParamToDict(
+		&GetUserPermissionResponse{
+			Permissions: lstNamePermission,
+		},
+	)
+	if err != nil {
+		return 400, nil, err
+	}
+
 	return 200, s, nil
 }

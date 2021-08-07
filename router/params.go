@@ -66,3 +66,11 @@ type UserDataUpdate struct {
 	MobileNo    string `json:"mobile_no"`
 	IsSuperUser bool   `json:"is_superuser"`
 }
+
+type GetUserPermissionParam struct {
+	UserId int `json:"user_id"`
+}
+
+type GetUserPermissionResponse struct {
+	Permissions []string `json:"permissions"`
+}

@@ -83,7 +83,7 @@ func (r *AppCache) Find(val string) (int, bool) {
 	return -1, false
 }
 
-func (r AppCache) KeyContainDelete(key string) {
+func (r *AppCache) KeyContainDelete(key string) {
 	for _, val := range r.KeyContain(key) {
 		r.Delete(val)
 	}
