@@ -2,5 +2,5 @@ version: "1"
 services:
     docker_go_aut_master:
         image: docker_go_aut    
-        command: go run main.go
-        ports: 8000:8000
+        command: sh -c "go build && ./aut"
+        ports: 3000:3000
