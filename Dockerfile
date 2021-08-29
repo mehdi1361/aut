@@ -1,5 +1,9 @@
-FROM golang:1.16
-RUN apt update
+FROM golang:1.16-alpine
+
+WORKDIR /app
 COPY . .
-RUN go mode
-RUN go get
+COPY go.mod ./
+RUN go mod download
+RUN go get -t
+RUN go build
+CMD [ "./aut" ]
