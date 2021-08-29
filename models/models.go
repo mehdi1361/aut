@@ -170,7 +170,7 @@ func init() {
 	defer conn.Close()
 
 	db := conn
-	_ = db.AutoMigrate(&User{}, &Role{}, &Permission{}, CustomerRole{})
+	_ = db.AutoMigrate(&App{}, &User{}, &Role{}, &Permission{}, CustomerRole{}, &Group{}, &Branch{})
 
 	db.Model(&Permission{}).AddForeignKey("role_id", "auth_service_role(id)", "CASCADE", "CASCADE")
 	db.Model(&User{}).AutoMigrate()
