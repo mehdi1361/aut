@@ -1,6 +1,7 @@
-version: "1"
+version: "3.8"
 services:
-    docker_go_aut_master:
-        image: docker_go_aut    
-        command: sh -c "go build && ./aut"
-        ports: 3000:3000
+  aut_501_master:
+    image: aut_501_master:latest
+    container_name: aut_501_master
+    ports:
+      - 3000:3000
