@@ -47,7 +47,7 @@ func AppCheckResponse(f ParamsApp) map[string]interface{} {
 	}
 }
 
-func UserLogin(param LoginParam) (int, map[string]interface{}, error) {
+func UserLogin(param LoginParam) (int, interface{}, error) {
 	db, err := models.Connect()
 	if err != nil {
 		return 400, nil, err
@@ -69,28 +69,34 @@ func UserLogin(param LoginParam) (int, map[string]interface{}, error) {
 	}
 	db.Model(&user).Related(&permissions, "Permissions")
 
-	var lstNamePermission []string
+	//var lstNamePermission []string
+	var lstNamePermission []map[string]interface{}
+
 	for _, v := range permissions {
-		lstNamePermission = append(lstNamePermission, v.Name)
+		dataD := make(map[string]interface{})
+		dataD["name"] = v.Name
+		dataD["fa_name"] = v.FaName
+		dataD["url"] = v.Url
+		dataD["method"] = v.Method
+		lstNamePermission = append(lstNamePermission, dataD)
 	}
 	defer db.Close()
 
 	token := fmt.Sprintf("%s-%s", common.TokenGenerator(user), user.UserId)
-	s, err := convertParamToDict(
-		&LoginParamResponse{
-			UserName:    param.UserName,
-			Token:       token,
-			Permissions: lstNamePermission,
-			UserType:    user.UserType,
-			IsSuperuser: user.IsSuperUser,
-		},
-	)
-	if err != nil {
-		return 400, nil, err
+	s := &LoginParamResponse{
+		UserName:    param.UserName,
+		Token:       token,
+		Permissions: lstNamePermission,
+		UserType:    user.UserType,
+		IsSuperuser: user.IsSuperUser,
 	}
+
+	//if err != nil {
+	//	return 400, nil, err
+	//}
 	AppCache.KeyContainDelete(user.UserId)
 	_ = AppCache.Set(token, s, 20*time.Hour)
-	return 200, s, nil
+	return 200, token, nil
 }
 
 func GetPermission(userId int) (int, map[string]interface{}, error) {
@@ -106,9 +112,13 @@ func GetPermission(userId int) (int, map[string]interface{}, error) {
 	db.Where("id=?", uId).First(&user)
 	db.Model(&user).Related(&permissions, "Permissions")
 
-	var lstNamePermission []string
+	var lstNamePermission []map[string]interface{}
 	for _, v := range permissions {
-		lstNamePermission = append(lstNamePermission, v.Name)
+		dataR := make(map[string]interface{})
+		dataR["id"] = v.ID
+		dataR["name"] = v.Name
+		dataR["fa_name"] = v.FaName
+		lstNamePermission = append(lstNamePermission, dataR)
 	}
 	defer db.Close()
 

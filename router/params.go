@@ -16,11 +16,11 @@ type LoginParam struct {
 }
 
 type LoginParamResponse struct {
-	UserName    string   `json:"username"`
-	Token       string   `json:"token"`
-	Permissions []string `json:"permissions"`
-	UserType    string   `json:"user_type"`
-	IsSuperuser bool     `json:"is_superuser"`
+	UserName    string                   `json:"username"`
+	Token       string                   `json:"token"`
+	Permissions []map[string]interface{} `json:"permissions"`
+	UserType    string                   `json:"user_type"`
+	IsSuperuser bool                     `json:"is_superuser"`
 }
 
 type CreateUserParam struct {
@@ -72,5 +72,5 @@ type GetUserPermissionParam struct {
 }
 
 type GetUserPermissionResponse struct {
-	Permissions []string `json:"permissions"`
+	Permissions []map[string]interface{} `json:"permissions"`
 }

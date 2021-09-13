@@ -67,12 +67,17 @@ func UserLoginHandler(c *gin.Context) {
 	}
 	db.Find(&records)
 
-	statusCode, result, err := UserLogin(param)
-	if err != nil {
-		c.JSON(statusCode, err)
-	} else {
-		c.JSON(statusCode, result)
+	_ , token, err := UserLogin(param)
+
+	d, _ := AppCache.Get(token.(string))
+	var result map[string]interface{}
+	_ = json.Unmarshal([]byte(string(d)), &result)
+	fmt.Println(result["permissions"])
+	if result != nil {
+		c.JSON(200, result)
+		return
 	}
+	c.JSON(400, gin.H{"message": "user not found"})
 }
 
 func CreateUser(c *gin.Context) {
@@ -120,7 +125,7 @@ func CheckPermission(c *gin.Context) {
 		c.JSON(200, result)
 		return
 	}
-	c.JSON(200, gin.H{"message": "user not found"})
+	c.JSON(400, gin.H{"message": "user not found"})
 
 }
 

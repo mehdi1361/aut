@@ -95,6 +95,9 @@ func (r *Role) TableName() string {
 type Permission struct {
 	gorm.Model
 	Name   string  `json:"name" gorm:"size:50;unique"`
+	FaName string  `json:"fa_name" gorm:"size:50;unique"`
+	Url    string  `json:"url" gorm:"size:150;UNIQUE_INDEX:compositeindex;index;not null"`
+	Method string  `json:"method" gorm:"size:50";UNIQUE_INDEX:compositeindex;index;not null"`
 	RoleId uint    `json:"role_id" gorm:"Column:role_id"`
 	Users  []*User `json:"users" gorm:"many2many:auth_user_service_permission"`
 }
