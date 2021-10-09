@@ -71,13 +71,14 @@ func UserLogin(param LoginParam) (int, interface{}, error) {
 
 	//var lstNamePermission []string
 	var lstNamePermission []map[string]interface{}
-
 	for _, v := range permissions {
+		fmt.Println(v)
 		dataD := make(map[string]interface{})
 		dataD["name"] = v.Name
 		dataD["fa_name"] = v.FaName
 		dataD["url"] = v.Url
 		dataD["method"] = v.Method
+		dataD["role_id"] = v.RoleId
 		lstNamePermission = append(lstNamePermission, dataD)
 	}
 	defer db.Close()
